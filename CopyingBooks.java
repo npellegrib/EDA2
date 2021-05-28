@@ -1,89 +1,41 @@
 import java.util.Scanner;
 
+import javax.management.monitor.StringMonitor;
+
 public class CopyingBooks{
 
- 
-
-    public static Object Solve(int list[],int k){
-        if (k == 1) {
-            return list;
-        }else{
-            return SolveAux(list, k);
-        }
-    }
-
-    public static String[] SolveAux(int list[], int k){
-        int max = list[0];
-        String answer[] = new String[(list.length - 1) + k - 1];
-        int pointers[] = new int[k];
-        int index = 0;
-
-        for (int i = 1; i < list.length;) {
-            if (max > MinArray(i, list.length - 1, list) && index < pointers.length) {
-                pointers[index] = i;
-                index++;
-                max = list[i];
-            }else{
-                max = max + list[i];
-                i++;
-            }
-        }
-
-        index = 0;
-        int j = 0;
-
-        for (int i = 0; i < answer.length; i++) {
-            
-            if (j < pointers.length && index < list.length) {
-                if (pointers[j] == i) {
-                    answer[i] = "/";
-                    j++;
-                }else{
-                    answer[i] = list[index] + "";
-                    index++;
-                }
-            }
-        }
-
-        return answer;
-
-    }
-
-    public static int MinArray(int start, int end,int books[]){
-        if (start == end) {
-            return books[start];
-        }else{
-            int middle = (start + end)/2;
-            int Min_Left = MinArray(start, middle, books);
-            int Min_Rigth = MinArray(middle + 1, end, books);
-            int Min_Middle = CalcMinMiddle(books, middle);
-
-            return Math.min(Min_Left,Math.min(Min_Rigth, Min_Middle));
-        }
-    }
-
-
-    public static int CalcMinMiddle(int aux[],int index){
-        int suma = 0;
-        int Max_Left = -1000000000;
-        for(int i = 0; i < index -1;i++ ){
-            suma = suma + aux[i];
-            if (suma > Max_Left) {
-                Max_Left = suma;
-            }
-        }
-
-        suma = 0;
-        int Max_Rigth = -1000000000;
-        for (int i = index; i < aux.length; i++) {
-            suma = suma + aux[i];
-            if (suma > Max_Rigth) {
-                Max_Rigth = suma;
-            }
-        }
-
-        return Max_Left + Max_Rigth;
-    }
+	public static int Solve(int base, int[] lista, int k, int[] pointers) {
+		if (k == 1) {
+			int suma = 0;
+			for (int i = base; i < lista.length; i++) {
+				suma += lista[i];
+			}
+			return suma;
+		}  else {
+			int sumaIzq = 0;
+			int resultado = Integer.MAX_VALUE;
+			boolean detenerse = false;
+			while (base < lista.length-(k-1) && !detenerse) {
+				sumaIzq += lista[base];
+				base++;
+				int sumaDer = Solve(base, lista, k-1, pointers);
+				int resultadoActual = sumaDer;
+				if (sumaIzq > sumaDer) {
+					resultadoActual = sumaIzq;
+					detenerse = true;
+				}
+				if (resultadoActual < resultado) {
+					resultado = resultadoActual;
+					pointers[k-1] = base;
+				}
+				if (resultadoActual == resultado) {
+					
+				}
+			}	
+			return resultado;
+		}
+	}
+	
 
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
@@ -95,22 +47,35 @@ public class CopyingBooks{
             int m = scan.nextInt();
             int k = scan.nextInt();
             int books[] = new int[m];
+			int aux = 0;
 
             for (int j = 0; j < m; j++) {
                 books[j] = scan.nextInt();
+				aux += books[j];
             }
-            if (k == 1) {
-                int solution[] = (int[])Solve(books, k); 
-
-                for (int j = 0; j < solution.length; j++) {
-                    System.out.println(solution[j]+ " ");
-                }
-            }else{
-                String sol[] = (String[])Solve(books, k);
-                for (int j = 0; j < sol.length - 1; j++) {
-                    System.out.println(sol[j]+ " ");
-                }
-            }
+                int[] pointers = new int[k];
+            	int suma = Solve(0, books, k, pointers);
+				String solucion[] = new String[books.length + pointers.length]; 
+                if(suma == aux){
+					for (int j = 0; j < books.length; j++) {
+						
+                    	System.out.println(books[j]+ " ");
+                	}
+				}else{
+					for (int j = 0,temp = 1,z = 0; j < solucion.length && temp < pointers.length && z < books.length;) {
+						if (pointers[temp] == j) {
+							solucion[j] = "/";
+							temp++;
+							System.out.print(solucion[j] + " ");
+							j++;
+						}else{
+							solucion[j] = books[z] + "";
+							System.out.print(solucion[j] + " ");
+							z++;
+							j++;
+						}
+					}
+				}
         }
         scan.close();
     }
